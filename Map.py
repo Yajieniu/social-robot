@@ -1,5 +1,5 @@
 from tkinter import *
-from Utils.py import *
+import Utils
 import time
 
 
@@ -16,7 +16,7 @@ class Map:
 		self.people_dict = {}
 		self.obstacle_dict = {}
 		self.size = 5
-		self.size *= ROBOT_MARGIN
+		self.size *= Utils.ROBOT_MARGIN
 		self.width = width * self.size
 		self.height = height * self.size
 		self.root = Tk()

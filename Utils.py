@@ -2,6 +2,16 @@
 
 ROBOT_MARGIN = 5
 
+TURN_LEFT = 0
+TURN_RIGHT = 1
+TURN_BACK = 2
+MOVE_FORWARD = 3
+
+LEFT = 0
+RIGHT = 1
+TOP = 2
+DOWN = 3
+
 def robot_get_range(x, y, size):
 	x_left   = x + ROBOT_MARGIN
 	y_top    = y + ROBOT_MARGIN

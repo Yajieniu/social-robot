@@ -1,6 +1,5 @@
 import random
-
-
+import Utils as u
 
 
 # people have attitude to robot
@@ -32,7 +31,21 @@ class Obstacle:
 
 
 class Robot:
-	def __init__(self):
+	def __init__(self, priority):
+		self.actions = [u.LEFT, u.RIGHT, u.BACK, u.FORWARD]
+		self.x = 0
+		self.y = 0
+		self.loc = [self.x, self.y] 
+		self.direction = u.RIGHT
+		self.priority = priority
+		self.time = 0
+
+		self.state = {}
+		self.state['loc'] = self.loc
+		self.state['direction'] = self.direction
+		self.state['priority'] = self.priority
+		self.state['time'] = self.time
+
 
 
 
