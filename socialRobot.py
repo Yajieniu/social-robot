@@ -14,8 +14,6 @@ class Game:
 
 		r = getReward(self.robot.state)
 
-		# get human feedback
-
 		e, h = getHumanFeedback()
 
 		r = updateR(e, h, r)
