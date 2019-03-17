@@ -89,7 +89,6 @@ class Game:
 			obj = self.objects[name]
 			if self.clock == obj.startClock and self.minutes == 0:
 				self.map.create_object(obj)
-				print("!!!!!!!!!!!!!!!")
 			if self.clock == obj.endClock and self.minutes == 0:
 				self.map.remove_object(obj)
 
@@ -109,12 +108,13 @@ class Game:
 		self.updateTime(action)
 		self.robot.updateState(action, self.clock)
 		self.updateMap()
-		self.finalReport()
+		self.printTime()
 
-		if self.robot.x == self.mapWidth and self.robot.y == self.mapHeight:
+		if self.robot.x == (self.mapWidth-1) and self.robot.y == (self.mapHeight):
 			self.endGame = True
+			self.endGame = False
 
-	def finalReport(self):
+	def printTime(self):
 		clock = str(self.clock)
 		minutes = str(self.minutes)
 		seconds = str(self.seconds)
@@ -130,6 +130,9 @@ class Game:
 			seconds = '0' + seconds
 
 		print("Time: " + clock + ":" + minutes + ":" + seconds)
+
+	def finalReport(self):
+		pass
 
 
 game = Game()

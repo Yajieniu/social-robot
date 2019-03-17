@@ -55,54 +55,42 @@ class Robot:
 		if action == u.MOVE_FORWARD:
 			if self.direction == u.RIGHT:
 				self.x += 1
-			if self.direction == u.LEFT:
+			elif self.direction == u.LEFT:
 				self.x -= 1
-			if self.direction == u.UP:
+			elif self.direction == u.UP:
 				self.y -= 1
-			if self.direction == u.DOWN:
+			elif self.direction == u.DOWN:
 				self.y += 1
 
-		if action == u.TURN_BACK:
+		elif action == u.TURN_BACK:
 			if self.direction == u.RIGHT:
 				self.direction = u.LEFT
-				return
-			if self.direction == u.LEFT:
+			elif self.direction == u.LEFT:
 				self.direction = u.RIGHT
-				return
-			if self.direction == u.UP:
+			elif self.direction == u.UP:
 				self.direction = u.DOWN
-				return
-			if self.direction == u.DOWN:
+			elif self.direction == u.DOWN:
 				self.direction = u.UP
-				return
+				
+		elif action == u.TURN_RIGHT:
+			if self.direction == u.RIGHT:
+				self.direction = u.DOWN
+			elif self.direction == u.LEFT:
+				self.direction = u.UP
+			elif self.direction == u.UP:
+				self.direction = u.RIGHT
+			elif self.direction == u.DOWN:
+				self.direction = u.LEFT
 
-		if action == u.TURN_RIGHT:
-			if self.direction == u.RIGHT:
-				self.direction = u.DOWN
-				return
-			if self.direction == u.LEFT:
-				self.direction = u.UP
-				return
-			if self.direction == u.UP:
-				self.direction = u.RIGHT
-				return
-			if self.direction == u.DOWN:
-				self.direction = u.LEFT
-				return
-
-		if action == u.TURN_LEFT:
+		elif action == u.TURN_LEFT:
 			if self.direction == u.RIGHT:
 				self.direction = u.UP
-				return
-			if self.direction == u.LEFT:
+			elif self.direction == u.LEFT:
 				self.direction = u.DOWN
-				return
-			if self.direction == u.UP:
+			elif self.direction == u.UP:
 				self.direction = u.LEFT
-				return
-			if self.direction == u.DOWN:
+			elif self.direction == u.DOWN:
 				self.direction = u.RIGHT
-				return
 
 
 

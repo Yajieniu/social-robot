@@ -72,10 +72,8 @@ class Map:
 
 		# if this object is already created
 		if item.name in self.object_dict:
-			print("did you return?")
 			return 
 
-		print("didn't return")
 		x1 = item.x1 * self.size
 		x2 = item.x2 * self.size
 		y1 = item.y1 * self.size
@@ -87,12 +85,9 @@ class Map:
 				self.occupants[width][height] = item.type
 
 		if item.type == u.PEOPLE:
-			print("why didn't draw?")
 			if item.dislike:
 				self.object_dict[item.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=DISLIKE_COLOR)
-				print("should have1")
 			else:
-				print("should have2")
 				self.object_dict[item.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=NEUTRAL_COLOR)
 		elif item.type == u.OBSTACLE:
 			self.object_dict[item.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=OBSTACLE_COLOR)
