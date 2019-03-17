@@ -10,6 +10,9 @@ class Game:
 		self.map.create_robot()
 		self.reward_table = [self.map.width][self.map.height]
 
+	def getReward(self):
+		pass
+		
 	def update(self):
 
 		r = getReward(self.robot.state)
@@ -17,8 +20,6 @@ class Game:
 		e, h = getHumanFeedback()
 
 		r = updateR(e, h, r)
-
-		WriteRToFile()
 
 		ChooseAction()
 
