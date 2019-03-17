@@ -1,5 +1,4 @@
 
-
 ROBOT_MARGIN = 5
 
 TURN_LEFT = 0
@@ -9,8 +8,12 @@ MOVE_FORWARD = 3
 
 LEFT = 0
 RIGHT = 1
-TOP = 2
+UP = 2
 DOWN = 3
+
+PEOPLE = 1
+OBSTACLE = 2
+ROOM = 3
 
 def robot_get_range(x, y, size):
 	x_left   = x + ROBOT_MARGIN
@@ -20,8 +23,17 @@ def robot_get_range(x, y, size):
 
 	return x_left, x_right, y_top, y_bottom
 
+def robot_position(x, y, size, direction):
+	if direction == LEFT:
+		return robot_face_left(x, y, size)
+	if direction == RIGHT:
+		return robot_face_right(x, y, size)		
+	if direction == UP:
+		return robot_face_up(x, y, size)
+	if direction == DOWN:
+		return robot_face_down(x, y, size)
 
-def robot_face_top(x, y, size):
+def robot_face_up(x, y, size):
 	x_left, x_right, y_top, y_bottom = robot_get_range(x, y, size)
 	x_middle = int((x_left + x_right) / 2)
 
@@ -58,7 +70,7 @@ def robot_face_right(x, y, size):
 	x_left, x_right, y_top, y_bottom = robot_get_range(x, y, size)
 	y_middle = int((y_top + y_bottom) / 2)
 
-	point1 = [x_left, y_left]
+	point1 = [x_left, y_top]
 	point2 = [x_left, y_bottom]
 	point3 = [x_right, y_middle]
 

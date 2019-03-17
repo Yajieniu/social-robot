@@ -1,5 +1,5 @@
-from tkinter import *
-import Utils
+from Tkinter import *
+import Utils as u
 import time
 
 
@@ -13,12 +13,15 @@ ROBOT_COLOR = 'tomato'
 class Map:
 	def __init__(self, width=16, height=9):
 		self.agentGUI = None
-		self.people_dict = {}
-		self.obstacle_dict = {}
+		self.object_dict = {}
 		self.size = 5
-		self.size *= Utils.ROBOT_MARGIN
+		self.size *= u.ROBOT_MARGIN
 		self.width = width * self.size
 		self.height = height * self.size
+
+		self.robot = None
+		self.occupants = [[0] * height] * width
+		
 		self.root = Tk()
 		self.root.title("Social Robot Simulator")
 		self.canvas = Canvas(self.root, width=self.width, height=self.height)
@@ -45,6 +48,12 @@ class Map:
 		rooms[12] = [3, 3, 4, 4]
 		rooms[13] = [12, 6, 15, 8]
 
+		# udpate occupants for rooms
+		for i in range(14):
+			for width in range(rooms[i][0], rooms[i][2]):
+				for height in range(rooms[i][1], rooms[i][3]):
+					self.occupants[width][height] = u.ROOM
+
 		# Draw rooms 
 		for i in range(numRoom):
 			rooms[i] = [rooms[i][j] * self.size for j in range(4)]
@@ -59,44 +68,59 @@ class Map:
 				self.canvas.create_line(0, j, self.width, j, fill="gray", dash=(1, 4))	
 
 
-	def create_people(self, people):
-		x1 = people.x1 * self.size
-		x2 = people.x2 * self.size
-		y1 = people.y1 * self.size
-		y2 = people.y2 * self.size
+	def create_object(self, item):
 
-		if people.dislike:
-			self.people_dict[people.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=DISLIKE_COLOR)
+		# if this object is already created
+		if item.name in self.object_dict:
+			print("did you return?")
+			return 
+
+		print("didn't return")
+		x1 = item.x1 * self.size
+		x2 = item.x2 * self.size
+		y1 = item.y1 * self.size
+		y2 = item.y2 * self.size
+
+		# udpate occupants for people or obstacle
+		for width in range(item.x1, item.x2):
+			for height in range(item.y1, item.y2):
+				self.occupants[width][height] = item.type
+
+		if item.type == u.PEOPLE:
+			print("why didn't draw?")
+			if item.dislike:
+				self.object_dict[item.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=DISLIKE_COLOR)
+				print("should have1")
+			else:
+				print("should have2")
+				self.object_dict[item.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=NEUTRAL_COLOR)
+		elif item.type == u.OBSTACLE:
+			self.object_dict[item.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=OBSTACLE_COLOR)
 		else:
-			self.people_dict[people.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=NEUTRAL_COLOR)
+			raise ValueError('Create object: wrong object type.')
 
-	def create_obstacle(self, obstacle):
-		x1 = obstacle.x1 * self.size
-		x2 = obstacle.x2 * self.size
-		y1 = obstacle.y1 * self.size
-		y2 = obstacle.y2 * self.size
-
-		self.obstacle_dict[obstacle.name] = self.canvas.create_oval(x1, y1, x2, y2, fill=OBSTACLE_COLOR)
-
-
-	def create_robot(self, robot):
+	def draw_robot(self, robot):
 		x = robot.x * self.size
 		y = robot.y * self.size
 
-		p1, p2, p3 = robot_face_right(x, y, self.size)
+		if self.robot != None:
+			self.canvas.delete(self.robot)
+		
+		p1, p2, p3 = u.robot_position(x, y, self.size, robot.direction)
 		self.robot = self.canvas.create_polygon(p1[0], p1[1],
 												p2[0], p2[1],
 												p3[0], p3[1],
 												fill=ROBOT_COLOR)
 
+	# remove people or obstacle from the map
+	def remove_object(self, item):
+		if item.name in self.object_dict:
+			self.canvas.delete(self.object_dict[item.name])
+			del self.object_dict[item.name]
 
 	def update(self):
 		self.canvas.update()
-		self.canvas.after(30)
+		self.canvas.after(40)
 
 
-m = Map()
-m.create_room()
-while True:
-	m.update()
 
