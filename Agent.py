@@ -1,6 +1,8 @@
 import random
 import Utils as u
 import Map as m
+from QLearn import *
+import numpy as np
 
 # people have attitude to robot
 # attitude can be neutral or negative
@@ -36,62 +38,65 @@ class Obstacle:
 
 class Robot:
 	def __init__(self, priority, clock):
-		self.x = 0
-		self.y = 0
-		self.loc = [self.x, self.y] 
-		self.direction = u.RIGHT
-		self.priority = priority
-		self.clock = clock
+
+		#Represent in state as 0,1,2,3
+		self.actions = [u.MOVE_FORWARD, u.RIGHT, u.DOWN, u.LEFT]
 
 		self.state = {}
-		self.state['loc'] = self.loc
-		self.state['direction'] = self.direction
-		self.state['priority'] = self.priority
-		self.state['clock'] = self.clock
+		self.state['x'] = 0
+		self.state['y'] = 0
+		self.state['direction'] = u.RIGHT
+		self.state['actions'] = 0
+		self.state['priority'] = priority
+		self.state['clock'] = clock
+		self.ai = QLearn(self.actions)
 
 	def updateState(self, action, clock):
 		self.clock = clock
 
 		if action == u.MOVE_FORWARD:
-			if self.direction == u.RIGHT:
-				self.x += 1
-			elif self.direction == u.LEFT:
-				self.x -= 1
-			elif self.direction == u.UP:
-				self.y -= 1
-			elif self.direction == u.DOWN:
-				self.y += 1
+			self.state['actions'] = 0
+			if self.state['direction'] == u.RIGHT:
+				self.state['y'] += 1
+			elif self.state['direction'] == u.LEFT:
+				self.state['y'] -= 1
+			elif self.state['direction'] == u.UP:
+				self.state['x'] -= 1
+			elif self.state['direction'] == u.DOWN:
+				self.state['x'] += 1
 
 		elif action == u.TURN_BACK:
-			if self.direction == u.RIGHT:
-				self.direction = u.LEFT
-			elif self.direction == u.LEFT:
-				self.direction = u.RIGHT
-			elif self.direction == u.UP:
-				self.direction = u.DOWN
-			elif self.direction == u.DOWN:
-				self.direction = u.UP
+			self.state['actions'] = 2
+			if self.state['direction'] == u.RIGHT:
+				self.state['direction'] = u.LEFT
+			elif self.state['direction'] == u.LEFT:
+				self.state['direction'] = u.RIGHT
+			elif self.state['direction'] == u.UP:
+				self.state['direction'] = u.DOWN
+			elif self.state['direction'] == u.DOWN:
+				self.state['direction'] = u.UP
 				
 		elif action == u.TURN_RIGHT:
-			if self.direction == u.RIGHT:
-				self.direction = u.DOWN
-			elif self.direction == u.LEFT:
-				self.direction = u.UP
-			elif self.direction == u.UP:
-				self.direction = u.RIGHT
-			elif self.direction == u.DOWN:
-				self.direction = u.LEFT
+			self.state['actions'] = 1
+			if self.state['direction'] == u.RIGHT:
+				self.state['direction'] = u.DOWN
+			elif self.state['direction'] == u.LEFT:
+				self.state['direction'] = u.UP
+			elif self.state['direction'] == u.UP:
+				self.state['direction'] = u.RIGHT
+			elif self.state['direction'] == u.DOWN:
+				self.state['direction'] = u.LEFT
 
 		elif action == u.TURN_LEFT:
-			if self.direction == u.RIGHT:
-				self.direction = u.UP
-			elif self.direction == u.LEFT:
-				self.direction = u.DOWN
-			elif self.direction == u.UP:
-				self.direction = u.LEFT
-			elif self.direction == u.DOWN:
-				self.direction = u.RIGHT
-
+			self.state['actions'] = 3
+			if self.state['direction'] == u.RIGHT:
+				self.state['direction'] = u.UP
+			elif self.state['direction'] == u.LEFT:
+				self.state['direction'] = u.DOWN
+			elif self.state['direction'] == u.UP:
+				self.state['direction'] = u.LEFT
+			elif self.state['direction'] == u.DOWN:
+				self.state['direction'] = u.RIGHT
 
 
 # This is a human feedback emulator

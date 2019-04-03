@@ -6,10 +6,11 @@ TURN_RIGHT = 1
 TURN_BACK = 2
 MOVE_FORWARD = 3
 
-LEFT = 0
+
+LEFT = 3
 RIGHT = 1
-UP = 2
-DOWN = 3
+UP = 0
+DOWN = 2
 
 PEOPLE = 1
 OBSTACLE = 2
@@ -23,8 +24,10 @@ def robot_get_range(x, y, size):
 
 	return x_left, x_right, y_top, y_bottom
 
-def robot_position(x, y, size, direction):
+
+def robot_position(y, x, size, direction):
 	if direction == LEFT:
+		#print("LEFT: ",direction, "Check : ",LEFT)
 		return robot_face_left(x, y, size)
 	if direction == RIGHT:
 		return robot_face_right(x, y, size)		
@@ -33,7 +36,7 @@ def robot_position(x, y, size, direction):
 	if direction == DOWN:
 		return robot_face_down(x, y, size)
 
-def robot_face_up(x, y, size):
+def robot_face_left(x, y, size):
 	x_left, x_right, y_top, y_bottom = robot_get_range(x, y, size)
 	x_middle = int((x_left + x_right) / 2)
 
@@ -44,7 +47,7 @@ def robot_face_up(x, y, size):
 	return point1, point2, point3
 
 
-def robot_face_down(x, y, size):
+def robot_face_right(x, y, size):
 	x_left, x_right, y_top, y_bottom = robot_get_range(x, y, size)
 	x_middle = int((x_left + x_right) / 2)
 
@@ -55,7 +58,7 @@ def robot_face_down(x, y, size):
 	return point1, point2, point3
 
 
-def robot_face_left(x, y, size):
+def robot_face_up(x, y, size):
 	x_left, x_right, y_top, y_bottom = robot_get_range(x, y, size)
 	y_middle = int((y_top + y_bottom) / 2)
 
@@ -66,7 +69,7 @@ def robot_face_left(x, y, size):
 	return point1, point2, point3
 
 
-def robot_face_right(x, y, size):
+def robot_face_down(x, y, size):
 	x_left, x_right, y_top, y_bottom = robot_get_range(x, y, size)
 	y_middle = int((y_top + y_bottom) / 2)
 
