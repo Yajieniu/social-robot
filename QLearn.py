@@ -25,11 +25,14 @@ class QLearn:
         self.alpha = alpha
         self.gamma = gamma
         self.actions = actions
+        self.reward = -200
 
-    def getReward(self,flag):
-        if not flag:
+    def getReward(self,flag,feedback):
+        if not flag and not feedback:
+            return self.reward
+
+        else:
             return 0
-        return 0
 
     def learn(self,state, reward,action):
         if action == u.MOVE_FORWARD:

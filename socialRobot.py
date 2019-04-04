@@ -1,5 +1,6 @@
 from Map import *
 from Agent import *
+from Utils import *
 from QLearn import *
 import numpy as np
 class Game:
@@ -24,7 +25,7 @@ class Game:
 		self.map.draw_robot(self.robot)
 		self.flag = False
 		self.create_objects()
-		
+		self.critical_section = [(4,4)]
 
 	# pre-defined now
 	def create_objects(self):
@@ -65,14 +66,38 @@ class Game:
 		self.map.draw_robot(self.robot)
 		self.map.update()
 
+#Ask for feedback
+	def ask_feedback(self,action):
+		# TURN_LEFT = 0
+		# TURN_RIGHT = 1
+		# TURN_BACK = 2
+		# MOVE_FORWARD = 3
+		if action == 0:
+			text = "TURN_LEFT"
+		elif action == 1:
+			text = "TURN_RIGHT"
+		elif action == 2:
+			text = "TURN_BACK"
+		else:
+			text = "MOVE_FORWARD"
+		prompt = "The robot is trying to perform this action: "+ text +  " Please enter y or f for feedback"
+		feedback = input(prompt)
+		if feedback == 'y':
+			feedback = True
+		else:
+			feedback = False
 
-
-
+		return feedback
 	def update(self):
-		self.robot.x = 10
-		#print("Check state: ",self.robot.state)
+
 		action = self.robot.ai.chooseAction(self.robot.state, self.actions,self.rooms)
-		self.robot.ai.learn(self.robot.state, self.robot.ai.getReward(self.flag),action)
+		feedback = 0
+		#Just set one critical point for testing purpose
+		if self.robot.state['x'] == 4 and self.robot.state['y'] == 4:
+			self.flag = True
+			feedback = self.ask_feedback(action)
+		self.robot.ai.learn(self.robot.state, self.robot.ai.getReward(self.flag,feedback),action)
+		self.flag = False
 		self.updateTime(action)
 		self.robot.updateState(action, self.clock)
 		self.updateMap()
