@@ -144,7 +144,7 @@ game = Game()
 
 while True:
 	game.update()
-	if game.count > 5:
+	if game.count > 30:
 		np.save("Q_table.txt", game.robot.ai.q_tables)
 		break
 

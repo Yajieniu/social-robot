@@ -174,15 +174,15 @@ class QLearn:
         return action
     def chooseAction(self, state, actions,rooms):
         # print('choose action')
-
-        if random.random() > self.epsilon:  # a small chance that action is chose randomly
+        #Currently diabled
+        if random.random() > 1000000000:  # a small chance that action is chose randomly
             #print("Random")
             self.reduceRate += 1
             if self.epsilon > 0.01 and self.reduceRate == 50:
                 self.epsilon -= 0.001
                 self.reduceRate = 0
             action = self.find_correct_move(actions,rooms,state)
-
+            direction = 0
         else:
             #print("Not Random")
             maxq,direction = self.check_q(state,rooms)
