@@ -117,7 +117,7 @@ class Map:
 
 	def update(self):
 		self.canvas.update()
-		self.canvas.after(5)
+		self.canvas.after(100)
 
 
 

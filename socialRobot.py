@@ -26,7 +26,7 @@ class Game:
 		self.flag = False
 		self.create_objects()
 		self.critical_section = [(4,4)]
-
+		self.count = 0
 	# pre-defined now
 	def create_objects(self):
 		p1 = People('p1', 7, 0, 8, 1, 2, 9, 10, True)
@@ -83,34 +83,40 @@ class Game:
 		prompt = "The robot is trying to perform this action: "+ text +  " Please enter y or f for feedback"
 		feedback = input(prompt)
 		if feedback == 'y':
-			feedback = True
-		else:
 			feedback = False
+		else:
+			feedback = True
 
 		return feedback
 	def update(self):
 
-		action = self.robot.ai.chooseAction(self.robot.state, self.actions,self.rooms)
-		feedback = 0
+		action,direction = self.robot.ai.chooseAction(self.robot.state, self.actions,self.rooms)
+		feedback = False
 		#Just set one critical point for testing purpose
-		if self.robot.state['x'] == 4 and self.robot.state['y'] == 4:
-			self.flag = True
+		if self.robot.state['x'] == 4 and self.robot.state['y'] == 4 and self.flag:
 			feedback = self.ask_feedback(action)
-		self.robot.ai.learn(self.robot.state, self.robot.ai.getReward(self.flag,feedback),action)
-		self.flag = False
+		self.robot.ai.learn(self.robot.state, self.robot.ai.getReward(self.flag,feedback),action,direction)
 		self.updateTime(action)
 		self.robot.updateState(action, self.clock)
 		self.updateMap()
 		self.printTime()
 		if self.robot.state['x'] == 8 and self.robot.state['y'] == 15:
-			print(self.robot.ai.q_tables[self.robot.state['x'], self.robot.state['y']-1, self.robot.state['direction'],
-				  self.robot.state['clock']])
-			print(
-				self.robot.ai.q_tables[self.robot.state['x']-1, self.robot.state['y'], self.robot.state['direction'],
-									   self.robot.state['clock']])
+			# print(
+			# 	self.robot.ai.q_tables[3, 4, self.robot.state['direction'],
+			# 						   self.robot.state['clock']])
+			# print(
+			# 	self.robot.ai.q_tables[4, 3, self.robot.state['direction'],
+			# 						   self.robot.state['clock']])
+			# print(self.robot.ai.q_tables[self.robot.state['x'], self.robot.state['y']-1, self.robot.state['direction'],
+			# 	  self.robot.state['clock']])
+			# print(
+			# 	self.robot.ai.q_tables[self.robot.state['x']-1, self.robot.state['y'], self.robot.state['direction'],
+			# 						   self.robot.state['clock']])
+
 			self.robot.state['x'] = 0
 			self.robot.state['y'] = 0
 			self.robot.state['direction'] = u.RIGHT
+			self.count += 1
 
 
 	def printTime(self):
@@ -138,14 +144,9 @@ game = Game()
 
 while True:
 	game.update()
-	if game.endGame:
-		ans = input("Start a new game? Input 'y' or 'n':")
-
-		if ans == 'y':
-			game.newGame()
-		else:
-			game.finalReport()
-			break
+	if game.count > 5:
+		np.save("Q_table.txt", game.robot.ai.q_tables)
+		break
 
 
 
