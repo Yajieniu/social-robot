@@ -377,10 +377,10 @@ class Map:
 		screen = pg.display.set_mode((self.X,self.Y))
 		run = True
 		buttons = []
-		good = pg.image.load("Button_good.jpg").convert()
+		good = pg.image.load("good.jpg").convert()
 		socialgood = pg.transform.scale(good,(220,70))
 		effectgood = pg.transform.scale(good,(220,70))
-		bad = pg.image.load("Button_bad.jpg").convert()
+		bad = pg.image.load("bad.jpg").convert()
 		socialbad = pg.transform.scale(bad, (220, 70))
 		effectbad = pg.transform.scale(bad, (220, 70))
 
