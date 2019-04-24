@@ -36,6 +36,42 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length= 10):
 		pg.draw.line(surf, color, start, end, width)
 
 
+class Buttons(object):
+
+	def __init__(self):
+		self.button_list = {}
+		self.social_score = 0
+		self.effective_score = 0
+	def add_button(self,name,position,image,job):
+		rect = image.get_rect()
+		rect.x = position[0]
+		rect.y = position[1]
+		self.button_list[name] = {'position':position,"job":job,"image":image,"rect":rect}
+
+	def draw_button(self,screen):
+		for name in self.button_list:
+			button = self.button_list[name]
+			screen.blit(button['image'], button['position'])
+	def event_handler(self):
+		for event in pg.event.get():
+			if event.type == pg.MOUSEBUTTONDOWN:
+				for name in self.button_list:
+					button = self.button_list[name]
+					if button['rect'].collidepoint(event.pos):
+						if'social' in name:
+							if button['job'] == 'good':
+
+								self.social_score += 100
+							else:
+								self.social_score -= 100
+						else:
+							if button['job'] == 'good':
+								self.effective_score += 100
+							else:
+								self.effective_score -= 100
+
+
+
 class Map:
 
 	def __init__(self,X,Y,start_point,goal):
@@ -272,7 +308,7 @@ class Map:
 		pg.draw.line(screen, color, arrow_point, (x, y))
 
 
-	def draw_robot(self,screen,num_step):
+	def draw_robot(self,screen,num_step,buttons):
 		white = (255,255,255)
 		black = (0,0,0)
 		grey = (210,210,210)
@@ -288,11 +324,11 @@ class Map:
 		robot_point = self.realcoords[self.robot_point]
 		slope = (self.robot_y- goal_y)/(self.robot_x-self.realcoords[next_goal][0])
 		step_length = (goal_x-self.robot_x)/num_step
+		buttons.effective_score = 0
+		buttons.social_score = 0
 		for i in range(num_step):
 			self.robot_x += step_length
-
 			self.robot_y += step_length * slope
-			print(self.robot_y)
 			rec = pg.Rect(self.robot_x + 10, self.robot_y + 10, 10, 10)
 			screen.fill(white)
 			self.draw_keypoints(screen,grey)
@@ -300,8 +336,13 @@ class Map:
 			self.draw_path(screen,grey)
 			draw_dashed_line(screen,red,robot_point,next_goal_point)
 			pg.draw.rect(screen, red, rec)
+			buttons.draw_button(screen)
+			buttons.event_handler()
+			self.human_social = buttons.social_score
+			self.human_effective = buttons.effective_score
+			print(self.human_social)
 			pg.display.update()
-			clock.tick(500)
+			clock.tick(5)
 		self.robot_point = next_goal
 
 
@@ -318,13 +359,27 @@ class Map:
 		pg.init()
 		screen = pg.display.set_mode((self.X,self.Y))
 		run = True
+		buttons = []
+		good = pg.image.load("Button_good.jpg").convert()
+		socialgood = pg.transform.scale(good,(220,70))
+		effectgood = pg.transform.scale(good,(220,70))
+		bad = pg.image.load("Button_bad.jpg").convert()
+		socialbad = pg.transform.scale(bad, (220, 70))
+		effectbad = pg.transform.scale(bad, (220, 70))
+
+		button_list = Buttons()
+		button_list.add_button('socialgood',(400,520),socialgood,"good")
+		button_list.add_button('socialbad',(400, 620), socialbad, "bad")
+		button_list.add_button('effectgood',(900,520), effectgood, "good")
+		button_list.add_button('effectbad',(900, 620), effectbad, "bad")
 		while run:
 			pg.time.delay(100)
 
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					run = False
-			self.draw_robot(screen,20)
+			self.draw_robot(screen,20,button_list)
+
 		pg.quit()
 
 M = Map(1550,700,'r2','r25')
