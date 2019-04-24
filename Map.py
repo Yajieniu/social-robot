@@ -334,13 +334,30 @@ class Map:
 			self.draw_keypoints(screen,grey)
 			self.draw_wall(screen,black)
 			self.draw_path(screen,grey)
-			draw_dashed_line(screen,red,robot_point,next_goal_point)
 			pg.draw.rect(screen, red, rec)
+			#Drawing Tag
+			font = pg.font.Font('freesansbold.ttf', 40)
+			social_text = font.render('Social:', True, black, white)
+			effective_text = font.render("Effect:",True,black,white)
+
+			social_textRect = social_text.get_rect()
+			social_textRect.center = (300,620)
+			screen.blit(social_text,social_textRect)
+
+			effective_textRect = effective_text.get_rect()
+			effective_textRect.center = (800,620)
+			screen.blit(effective_text,effective_textRect)
+
+
+
+			draw_dashed_line(screen,red,robot_point,next_goal_point)
+
+
 			buttons.draw_button(screen)
 			buttons.event_handler()
 			self.human_social = buttons.social_score
 			self.human_effective = buttons.effective_score
-			print(self.human_social)
+
 			pg.display.update()
 			clock.tick(5)
 		self.robot_point = next_goal
