@@ -2,6 +2,7 @@ import pygame as pg
 import math
 import numpy
 import random
+import time
 
 def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length= 10):
 	x1, y1 = start_pos
@@ -58,6 +59,8 @@ class Buttons(object):
 				for name in self.button_list:
 					button = self.button_list[name]
 					if button['rect'].collidepoint(event.pos):
+						pg.mixer.music.load('social_good.mp3')
+						pg.mixer.music.play(0)
 						if'social' in name:
 							if button['job'] == 'good':
 
@@ -74,7 +77,7 @@ class Buttons(object):
 
 class Map:
 
-	def __init__(self,X,Y,start_point,goal,speed):
+	def __init__(self,X,Y,start_point,goal,speed,wait_time):
 		self.coords = {'r6': (32.1917800903, 115.396934509), 'i2': (48.1107788086, 105.988296509), 'i4': (17.42395401, 105.209571838), 'd1': (6.76491165161, 112.757469177), 'r13': (45.0136451721, 102.41947937), 'd20': (23.1707439423, 105.489807129), 'i6': (14.3663759232, 113.519447327), 'r2': (8.96481704712, 115.404937744), 'i3': (33.9062576294, 105.275985718), 'd3': (19.6334762573, 112.373733521), 'd7': (29.6615200043, 112.434532166), 'd21': (21.897064209, 105.102661133), 'd17': (39.4887695312, 105.35836792), 'd10': (40.969543457, 112.495727539), 'r16': (29.9390983582, 109.440086365), 'r10': (45.0729446411, 108.629150391), 'd23': (10.3303451538, 105.190734863), 'r26': (8.9367389679, 101.593757629), 'r11': (41.097858429, 108.535583496), 'd4': (21.2724895477, 112.182777405), 'd2': (7.84000778198, 112.361663818), 'd12': (44.9742736816, 112.654785156), 'r27': (9.1826210022, 108.222724915), 'r28': (39.008392334, 114.981956482), 'r4': (24.3392028809, 115.429176331), 'd15': (51.3042526245, 105.352783203), 'd22': (20.9218959808, 105.039749146), 'r3': (20.504863739, 115.55393219), 'r5': (28.5052490234, 115.402694702), 'd8': (30.8963489532, 112.769294739), 'd18': (33.4266395569, 102.005897522), 'r1': (5.29522514343, 115.758872986), 'd19': (29.7961959839, 105.645126343), 'r21': (24.374458313, 101.63004303), 'i5': (14.7835083008, 104.688957214), 'r9': (52.9659118652, 115.366699219), 'r22': (20.5140609741, 102.019271851), 'r14': (36.7606925964, 108.823013306), 'r15': (38.2078781128, 100.458351135), 'r24': (14.609085083, 108.930099487), 'd24': (32.7120475769, 111.065345764), 'd11': (43.5953216553, 112.446990967), 'd14': (48.2460250854, 112.334037781), 'r25': (14.2544584274, 116.043502808), 'r19': (32.3290367126, 101.768623352), 'r12': (54.8262786865, 106.72668457), 'd5': (21.9395313263, 112.771110535), 'r20': (27.9855327606, 101.263656616), 'r17': (24.0002746582, 108.502052307), 'd13': (45.9205169678, 112.526473999), 'r8': (47.2909011841, 115.680419922), 'r7': (43.5528831482, 115.033187866), 'd25': (27.1601924896, 111.037071228), 'i1': (10.9330873489, 112.724777222), 'd6': (23.1813697815, 112.850349426), 'd9': (39.5764350891, 112.495727539), 'r23': (15.3893146515, 102.381370544), 'd16': (41.3706283569, 104.915588379), 'r18': (18.7453746796, 109.395431519)}
 		self.adj = {'d2': {'r27', 'i1', 'd1', 'r2'}, 'd19': {'r20', 'r19', 'd20', 'i3'},
 			   'd23': {'r24', 'r23', 'i5', 'r27', 'r26'}, 'r23': {'i4', 'i5', 'd23'}, 'r12': {'r9', 'd15'},
@@ -114,6 +117,24 @@ class Map:
 		self.start = start_point
 		self.goal = goal
 		self.speed = speed
+		self.wait_time = wait_time
+		self.cost = 0
+
+
+		#COLOR:
+		self.white = (255, 255, 255)
+		self.black = (0, 0, 0)
+		self.grey = (210, 210, 210)
+		self.red = (255, 0, 0)
+		self.green = (0, 255, 0)
+		self.blue = (0, 0, 128)
+
+	def update_human_feedback(self,social,effective):
+		self.human_effective = effective
+		self.human_social = social
+
+	def get_human_feedback(self):
+		return (self.human_effective, self.human_social)
 
 	def draw_wall(self,screen,color):
 
@@ -287,111 +308,121 @@ class Map:
 					draw_dashed_line(screen, color, start, end)
 					count.append(point+adj_point)
 
-	def rotate(self,angle,radar_len,radar):
-		x = radar[0] + math.cos(math.radians(angle)) * radar_len
-		y = radar[1] + math.sin(math.radians(angle)) * radar_len
-		return x,y
 
-	#Not used for now
-	def draw_arrow(self,goal,screen,color):
-		goal_x = self.realcoords[goal][0]
-		goal_y = self.realcoords[goal][1]
-		slope = (self.robot_y- goal_y)/(self.robot_x-goal_x)
-		degree = numpy.arctan(slope) /math.pi * 180
-		if slope > 0:
-			rotate = 150
-		else:
-			rotate = 30
-		arrow_point = (self.robot_x + 20,self.robot_y + slope * 20)
+	def draw_feedback(self,black,white,screen):
+		# Drawing Feedback Tag
+		font = pg.font.Font('freesansbold.ttf', 40)
+		social_text = font.render('Social:', True, black, white)
+		effective_text = font.render("Effect:", True, black, white)
 
-		x,y = self.rotate(degree-rotate,20,arrow_point)
-		pg.draw.line(screen, color, arrow_point, (x, y))
-		x, y = self.rotate(degree +rotate, 20, arrow_point)
-		pg.draw.line(screen, color, arrow_point, (x, y))
+		social_textRect = social_text.get_rect()
+		social_textRect.center = (300, 620)
+		screen.blit(social_text, social_textRect)
 
+		effective_textRect = effective_text.get_rect()
+		effective_textRect.center = (800, 620)
+		screen.blit(effective_text, effective_textRect)
 
-	def draw_robot(self,screen,num_step,buttons,flags):
-		white = (255,255,255)
-		black = (0,0,0)
-		grey = (210,210,210)
-		red = (255,0,0)
-		green = (0,255,0)
-		blue = (0,0,128)
+	def draw_startendTag(self,screen,flags,black,white):
+		# Draw tag on the map
+		screen.blit(flags[0], (self.realcoords[self.start][0], self.realcoords[self.start][1] - 30))
+		screen.blit(flags[1], (self.realcoords[self.goal][0], self.realcoords[self.goal][1] - 30))
+
+		# Start End Tag
+		font = pg.font.Font('freesansbold.ttf', 20)
+		start_text = font.render('Start:', True, black, white)
+		end_text = font.render("End:", True, black, white)
+
+		start_textRect = start_text.get_rect()
+		start_textRect.center = (1300, 550)
+		screen.blit(start_text, start_textRect)
+
+		end_textRect = end_text.get_rect()
+		end_textRect.center = (1300, 650)
+		screen.blit(end_text, end_textRect)
+
+		screen.blit(flags[0], (1400, 520))
+		screen.blit(flags[1], (1400, 620))
+
+	def build_default(self,screen,flags):
+
+		screen.fill(self.white)
+		self.draw_keypoints(screen, self.grey)
+		self.draw_wall(screen, self.black)
+		self.draw_path(screen, self.grey)
+		self.draw_feedback(self.black, self.white, screen)
+		self.draw_startendTag(screen, flags, self.black, self.white)
+		# Draw robot
+		rec = pg.Rect(self.robot_x + 10, self.robot_y + 10, 10, 10)
+		pg.draw.rect(screen, self.red, rec)
+
+	def draw_robot(self,screen,next_goal,next_goal_point,goal_x,goal_y,flags):
 		clock = pg.time.Clock()
+		robot_point = self.realcoords[self.robot_point]
+		slope = (self.robot_y- goal_y)/(self.robot_x-next_goal_point[0])
+		step_length = (goal_x-self.robot_x)/self.speed
+		for i in range(self.speed):
+			for event in pg.event.get():
+				if event.type == pg.QUIT:
+					return False
+			self.robot_x += step_length
+			self.robot_y += step_length * slope
+
+			self.build_default(screen, flags)
+
+			#Show Selected next goal
+			draw_dashed_line(screen,self.red,robot_point,next_goal_point)
+
+			clock.tick(self.speed)
+		self.robot_point = next_goal
+
+		return True
+
+	def make_decision(self):
+
+		#Currently just random choice need to add RL
 		next_goal = random.choice(list(self.adj[self.robot_point]))
 		next_goal_point = self.realcoords[next_goal]
 		goal_x = self.realcoords[next_goal][0]
 		goal_y = self.realcoords[next_goal][1]
 
-		robot_point = self.realcoords[self.robot_point]
-		slope = (self.robot_y- goal_y)/(self.robot_x-self.realcoords[next_goal][0])
-		step_length = (goal_x-self.robot_x)/num_step
-		buttons.effective_score = 0
-		buttons.social_score = 0
-		for i in range(num_step):
+		return next_goal,next_goal_point,goal_x,goal_y
 
-			self.robot_x += step_length
-			self.robot_y += step_length * slope
-			rec = pg.Rect(self.robot_x + 10, self.robot_y + 10, 10, 10)
-			screen.fill(white)
-			self.draw_keypoints(screen,grey)
-			self.draw_wall(screen,black)
-			self.draw_path(screen,grey)
-			screen.blit(flags[0], (self.realcoords[self.start][0],self.realcoords[self.start][1]-30))
-			screen.blit(flags[1],(self.realcoords[self.goal][0],self.realcoords[self.goal][1]-30))
-			pg.draw.rect(screen, red, rec)
+	def get_next_goal(self,buttons,screen,flags):
 
-			#Drawing Feedback Tag
-			font = pg.font.Font('freesansbold.ttf', 40)
-			social_text = font.render('Social:', True, black, white)
-			effective_text = font.render("Effect:",True,black,white)
+		buttons.draw_button(screen)
+		possible_choice = list(self.adj[self.robot_point])
+		score_list = {}
+		while(len(possible_choice) > 0):
+			buttons.social_score = 0
+			buttons.effective_score = 0
+			selected = False
 
-			social_textRect = social_text.get_rect()
-			social_textRect.center = (300,620)
-			screen.blit(social_text,social_textRect)
-
-			effective_textRect = effective_text.get_rect()
-			effective_textRect.center = (800,620)
-			screen.blit(effective_text,effective_textRect)
-
-			#Start End Tag
-			font = pg.font.Font('freesansbold.ttf', 20)
-			start_text = font.render('Start:', True, black, white)
-			end_text = font.render("End:", True, black, white)
-
-			start_textRect = start_text.get_rect()
-			start_textRect.center = (1300,550)
-			screen.blit(start_text,start_textRect)
-
-			end_textRect = end_text.get_rect()
-			end_textRect.center = (1300,650)
-			screen.blit(end_text,end_textRect)
-
-			screen.blit(flags[0], (1400,520))
-			screen.blit(flags[1],(1400,620))
-
-			#Show Selected next goal
-			draw_dashed_line(screen,red,robot_point,next_goal_point)
-
-
+			timeout = time.time() + self.wait_time
+			next_goal = random.choice(possible_choice)
+			self.build_default(screen, flags)
+			draw_dashed_line(screen, self.red, self.realcoords[self.robot_point], self.realcoords[next_goal])
 			buttons.draw_button(screen)
-			buttons.event_handler()
+			pg.display.update()
+			while not selected and time.time() <= timeout:
+				for event in pg.event.get():
+					if event.type == pg.QUIT:
+						return (0,0,0,0,False)
+				buttons.event_handler()
+				if buttons.social_score != 0 and buttons.effective_score != 0:
+					selected = True
+
+			# Update human feedback score
+			print("Reach here")
+			print(buttons.social_score)
+			print(buttons.effective_score)
 			self.human_social = buttons.social_score
 			self.human_effective = buttons.effective_score
-
-			pg.display.update()
-			clock.tick(self.speed)
-		self.robot_point = next_goal
-
-
-
-	def update_human_feedback(self,social,effective):
-		self.human_effective = effective
-		self.human_social = social
-
-	def get_human_feedback(self):
-
-		return (self.human_effective, self.human_social)
+			name = self.robot_point+next_goal
+			score_list[name] = [self.human_social, self.human_effective]
+			possible_choice.remove(next_goal)
+		next_goal,next_goal_point,goal_x,goal_y = self.make_decision()
+		return (next_goal,next_goal_point, goal_x, goal_y,True)
 
 	def start_map(self):
 		pg.init()
@@ -420,15 +451,31 @@ class Map:
 		button_list.add_button('effectbad',(900, 620), effectbad, "bad")
 		while run:
 			pg.time.delay(100)
-
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					run = False
-			self.draw_robot(screen,20,button_list,flags)
+			if not run:
+				break
+			#Restart the Run
+			#Need to pause and ask if continue
+			# if self.robot_point == self.goal:
+			# 	self.robot_point = self.start
+			# 	self.robot_x = self.realcoords[self.start][0]
+			# 	self.robot_y = self.realcoords[self.start][1]
 
+			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags)
+			if not run:
+				break
+			run = self.draw_robot(screen,next_goal,next_goal_point,goal_x,goal_y,flags)
+			if not run:
+				break
 		pg.quit()
 
-speed = 20
-M = Map(1550,700,'r1','d12',speed)
+speed = 10
+screen_resize_parameter = 1
+start = 'r1'
+end = 'd2'
+wait_time = 0.5
+M = Map(1550,700,start,end,speed,wait_time)
 
 M.start_map()
