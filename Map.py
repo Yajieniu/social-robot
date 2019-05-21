@@ -3,6 +3,7 @@ import math
 import numpy
 import random
 import time
+from RL import *
 
 def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length= 10):
 	x1, y1 = start_pos
@@ -35,6 +36,14 @@ def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length= 10):
 		start = (round(x1), round(y1))
 		end = (round(x2), round(y2))
 		pg.draw.line(surf, color, start, end, width)
+
+class Human(object):
+	def __init__(self,image,screen):
+		self.image = image
+		self.screen = screen
+
+	def draw_human(self,position):
+		self.screen.blit(self.image,position)
 
 
 class Buttons(object):
@@ -77,7 +86,7 @@ class Buttons(object):
 
 class Map:
 
-	def __init__(self,X,Y,start_point,goal,speed,wait_time):
+	def __init__(self,X,Y,start_point,goal,speed,wait_time,reward,mode,time_slot,finalQ,human_points,start_time):
 		self.coords = {'r6': (32.1917800903, 115.396934509), 'i2': (48.1107788086, 105.988296509), 'i4': (17.42395401, 105.209571838), 'd1': (6.76491165161, 112.757469177), 'r13': (45.0136451721, 102.41947937), 'd20': (23.1707439423, 105.489807129), 'i6': (14.3663759232, 113.519447327), 'r2': (8.96481704712, 115.404937744), 'i3': (33.9062576294, 105.275985718), 'd3': (19.6334762573, 112.373733521), 'd7': (29.6615200043, 112.434532166), 'd21': (21.897064209, 105.102661133), 'd17': (39.4887695312, 105.35836792), 'd10': (40.969543457, 112.495727539), 'r16': (29.9390983582, 109.440086365), 'r10': (45.0729446411, 108.629150391), 'd23': (10.3303451538, 105.190734863), 'r26': (8.9367389679, 101.593757629), 'r11': (41.097858429, 108.535583496), 'd4': (21.2724895477, 112.182777405), 'd2': (7.84000778198, 112.361663818), 'd12': (44.9742736816, 112.654785156), 'r27': (9.1826210022, 108.222724915), 'r28': (39.008392334, 114.981956482), 'r4': (24.3392028809, 115.429176331), 'd15': (51.3042526245, 105.352783203), 'd22': (20.9218959808, 105.039749146), 'r3': (20.504863739, 115.55393219), 'r5': (28.5052490234, 115.402694702), 'd8': (30.8963489532, 112.769294739), 'd18': (33.4266395569, 102.005897522), 'r1': (5.29522514343, 115.758872986), 'd19': (29.7961959839, 105.645126343), 'r21': (24.374458313, 101.63004303), 'i5': (14.7835083008, 104.688957214), 'r9': (52.9659118652, 115.366699219), 'r22': (20.5140609741, 102.019271851), 'r14': (36.7606925964, 108.823013306), 'r15': (38.2078781128, 100.458351135), 'r24': (14.609085083, 108.930099487), 'd24': (32.7120475769, 111.065345764), 'd11': (43.5953216553, 112.446990967), 'd14': (48.2460250854, 112.334037781), 'r25': (14.2544584274, 116.043502808), 'r19': (32.3290367126, 101.768623352), 'r12': (54.8262786865, 106.72668457), 'd5': (21.9395313263, 112.771110535), 'r20': (27.9855327606, 101.263656616), 'r17': (24.0002746582, 108.502052307), 'd13': (45.9205169678, 112.526473999), 'r8': (47.2909011841, 115.680419922), 'r7': (43.5528831482, 115.033187866), 'd25': (27.1601924896, 111.037071228), 'i1': (10.9330873489, 112.724777222), 'd6': (23.1813697815, 112.850349426), 'd9': (39.5764350891, 112.495727539), 'r23': (15.3893146515, 102.381370544), 'd16': (41.3706283569, 104.915588379), 'r18': (18.7453746796, 109.395431519)}
 		self.adj = {'d2': {'r27', 'i1', 'd1', 'r2'}, 'd19': {'r20', 'r19', 'd20', 'i3'},
 			   'd23': {'r24', 'r23', 'i5', 'r27', 'r26'}, 'r23': {'i4', 'i5', 'd23'}, 'r12': {'r9', 'd15'},
@@ -97,6 +106,7 @@ class Map:
 			   'r26': {'d23'}, 'd15': {'i2', 'r12'}, 'r14': {'d24', 'd9', 'd17'}, 'd5': {'r3', 'd4', 'd6'},
 			   'd4': {'d3', 'd22', 'd5', 'r17'}, 'r13': {'i2', 'd16'}, 'r28': {'d8', 'd9', 'd10'}, 'r18': {'d3'},
 			   'd18': {'r19', 'r15', 'i3'}, 'd12': {'d13', 'd11', 'r7'}, 'd10': {'r28', 'r11', 'd11', 'd9'}}
+		self.cost = {'r8': {'d13': 4.10700011253}, 'd9': {'r14': 3.64100003242, 'd10': 3.29799985886, 'd8': 7.46099996567, 'r28': 2.75699996948}, 'd24': {'r16': 3.73399996758, 'r14': 2.85100007057, 'd25': 5.5569999218}, 'r27': {'i1': 1.72899985313, 'd23': 4.132999897, 'd2': 3.52200007439}, 'd8': {'d7': 0.942000150681, 'r6': 4.27799987793, 'd9': 7.46099996567, 'r28': 7.81200003624}, 'r28': {'d10': 4.18099999428, 'd8': 7.81200003624, 'd9': 2.75699996948}, 'd6': {'r4': 4.1899998188, 'd7': 7.03400015831, 'd5': 2.20300006866}, 'd7': {'d6': 7.03400015831, 'r5': 3.53600001335, 'd8': 0.942000150681}, 'd4': {'r17': 4.90499997139, 'd5': 2.64700007439, 'd3': 1.57099986076, 'd22': 6.50600004196}, 'd5': {'d6': 2.20300006866, 'd4': 2.64700007439, 'r3': 2.96300005913}, 'd2': {'i1': 4.29799985886, 'r27': 3.52200007439, 'r2': 4.58299994469, 'd1': 2.3900001049}, 'd3': {'r25': 4.1360001564, 'r24': 5.03600001335, 'd4': 1.57099986076, 'r18': 3.45000004768, 'i6': 2.94499993324}, 'r21': {'d20': 4.3069999218}, 'd1': {'d2': 2.3900001049, 'r1': 3.63599991798}, 'd14': {'i2': 4.98699998856, 'r9': 2.44499993324, 'd13': 1.53499984741}, 'd15': {'i2': 3.81699991226, 'r12': 2.35400009155}, 'd16': {'r15': 4.74300003052, 'd17': 1.63700008392, 'i2': 5.57000017166, 'r13': 3.38599991798}, 'r24': {'i1': 3.60599994659, 'd23': 5.08400011063, 'i5': 3.617000103, 'i4': 5.08500003815, 'i6': 3.94299983978, 'r25': 4.875, 'd3': 5.03600001335}, 'd10': {'d9': 3.29799985886, 'r28': 4.18099999428, 'd11': 4.33200001717, 'r11': 4.74699997902}, 'd11': {'d10': 4.33200001717, 'd12': 3.10199999809, 'r10': 4.10699987411}, 'd12': {'r7': 2.40100002289, 'd11': 3.10199999809, 'd13': 4.13800001144}, 'd13': {'d14': 1.53499984741, 'r8': 4.10700011253, 'd12': 4.13800001144}, 'r23': {'d23': 3.12199997902, 'i5': 2.8100001812, 'i4': 3.52099990845}, 'd18': {'i3': 4.40499997139, 'r15': 2.69199991226, 'r19': 2.69500017166}, 'd19': {'d20': 4.86000013351, 'i3': 4.53600001335, 'r19': 3.0110001564, 'r20': 4.48300004005}, 'r22': {'d21': 3.54600000381}, 'r7': {'d12': 2.40100002289}, 'r20': {'d19': 4.48300004005}, 'r16': {'d25': 3.50899982452, 'd24': 3.73399996758}, 'r17': {'d4': 4.90499997139, 'd22': 5.17599987984, 'd25': 3.97300004959}, 'r14': {'d17': 3.66799998283, 'd24': 2.85100007057, 'd9': 3.64100003242}, 'r15': {'d16': 4.74300003052, 'd18': 2.69199991226}, 'r12': {'d15': 2.35400009155, 'r9': 6.19099998474}, 'r13': {'d16': 3.38599991798, 'i2': 3.75900006294}, 'r10': {'d11': 4.10699987411}, 'r11': {'d10': 4.74699997902}, 'i1': {'r27': 1.72899985313, 'r25': 5.59000015259, 'r24': 3.60599994659, 'd2': 4.29799985886, 'i6': 3.99799990654}, 'i3': {'d17': 3.61899995804, 'd18': 4.40499997139, 'd19': 4.53600001335, 'r19': 4.41199994087}, 'i2': {'d14': 4.98699998856, 'd15': 3.81699991226, 'd16': 5.57000017166, 'r13': 3.75900006294}, 'i5': {'d23': 2.492000103, 'r24': 3.617000103, 'r23': 2.8100001812, 'i4': 3.37199997902}, 'i4': {'i5': 3.37199997902, 'd22': 2.19499993324, 'r23': 3.52099990845, 'r24': 5.08500003815}, 'r18': {'d3': 3.45000004768}, 'r19': {'i3': 4.41199994087, 'd18': 2.69500017166, 'd19': 3.0110001564}, 'd17': {'i3': 3.61899995804, 'r14': 3.66799998283, 'd16': 1.63700008392}, 'i6': {'i1': 3.99799990654, 'r25': 3.02999997139, 'r24': 3.94299983978, 'd3': 2.94499993324}, 'r25': {'i1': 5.59000015259, 'r24': 4.875, 'd3': 4.1360001564, 'i6': 3.02999997139}, 'r4': {'d6': 4.1899998188}, 'r5': {'d7': 3.53600001335}, 'r6': {'d8': 4.27799987793}, 'r26': {'d23': 3.82299995422}, 'r1': {'d1': 3.63599991798}, 'r2': {'d2': 4.58299994469}, 'r3': {'d5': 2.96300005913}, 'd21': {'d20': 3.26300001144, 'd22': 0.75, 'r22': 3.54600000381}, 'd20': {'d21': 3.26300001144, 'd19': 4.86000013351, 'r21': 4.3069999218}, 'd23': {'r27': 4.132999897, 'r26': 3.82299995422, 'r24': 5.08400011063, 'r23': 3.12199997902, 'i5': 2.492000103}, 'd22': {'d21': 0.75, 'r17': 5.17599987984, 'd4': 6.50600004196, 'i4': 2.19499993324}, 'd25': {'r16': 3.50899982452, 'r17': 3.97300004959, 'd24': 5.5569999218}, 'r9': {'d14': 2.44499993324, 'r12': 6.19099998474}}
 		self.x_interval = 49.5310535431
 
 		self.y_interval = 15.585151673
@@ -104,7 +114,7 @@ class Map:
 		self.X = X
 		self.Y = Y
 
-
+		self.not_accept = 0
 		self.max_x = 54.8262786865
 		self.max_y = 116.043502808
 		self.min_x = 5.29522514343
@@ -118,8 +128,15 @@ class Map:
 		self.goal = goal
 		self.speed = speed
 		self.wait_time = wait_time
-		self.cost = 0
+		self.cur_time = start_time
 
+
+		#Define RL stuff
+		self.reward = reward
+		self.mode = mode
+		self.finalQ = finalQ
+		self.time_slot = time_slot
+		self.RL = QLearn(self.adj.keys(),self.adj,self.cost,self.reward,self.mode,self.time_slot, self.goal,self.finalQ,start_time)
 
 		#COLOR:
 		self.white = (255, 255, 255)
@@ -128,6 +145,9 @@ class Map:
 		self.red = (255, 0, 0)
 		self.green = (0, 255, 0)
 		self.blue = (0, 0, 128)
+
+		#Define Crowd:
+		self.human_points = human_points
 
 	def update_human_feedback(self,social,effective):
 		self.human_effective = effective
@@ -344,6 +364,18 @@ class Map:
 		screen.blit(flags[0], (1400, 520))
 		screen.blit(flags[1], (1400, 620))
 
+	def draw_time(self,screen,black,white):
+		font = pg.font.Font('freesansbold.ttf', 20)
+		time_tag = font.render('Time: ', True, black, white)
+		time_tagRect = time_tag.get_rect()
+		time_tagRect.center = (60, 550)
+		screen.blit(time_tag, time_tagRect)
+
+		time_text = font.render(str(round(self.cur_time,4)), True, black, white)
+		time_textRect = time_text.get_rect()
+		time_textRect.center = (200, 550)
+		screen.blit(time_text, time_textRect)
+
 	def build_default(self,screen,flags):
 
 		screen.fill(self.white)
@@ -352,6 +384,8 @@ class Map:
 		self.draw_path(screen, self.grey)
 		self.draw_feedback(self.black, self.white, screen)
 		self.draw_startendTag(screen, flags, self.black, self.white)
+		self.draw_time(screen,self.black,self.white)
+
 		# Draw robot
 		rec = pg.Rect(self.robot_x + 10, self.robot_y + 10, 10, 10)
 		pg.draw.rect(screen, self.red, rec)
@@ -379,20 +413,34 @@ class Map:
 		return True
 
 	def make_decision(self):
-
+		state = (self.robot_point,self.cur_time)
+		ifRandom = False
+		if ifRandom:
 		#Currently just random choice need to add RL
-		next_goal = random.choice(list(self.adj[self.robot_point]))
-		next_goal_point = self.realcoords[next_goal]
-		goal_x = self.realcoords[next_goal][0]
-		goal_y = self.realcoords[next_goal][1]
-
+			next_goal = random.choice(list(self.adj[self.robot_point]))
+			next_goal_point = self.realcoords[next_goal]
+			goal_x = self.realcoords[next_goal][0]
+			goal_y = self.realcoords[next_goal][1]
+		else:
+			#Update Human feedback to Q-table
+			self.RL.HumanFeedback(self.score_list,state)
+			action = self.RL.chooseAction(state)
+			print(action)
+			self.RL.learn(state,self.reward,action)
+			self.cur_time += self.cost[self.robot_point][action]
+			next_goal = action
+			next_goal_point = self.realcoords[next_goal]
+			goal_x = self.realcoords[next_goal][0]
+			goal_y = self.realcoords[next_goal][1]
 		return next_goal,next_goal_point,goal_x,goal_y
 
-	def get_next_goal(self,buttons,screen,flags):
+	def get_next_goal(self,buttons,screen,flags,human):
 
+		h_pos = (700,350)
 		buttons.draw_button(screen)
+		human.draw_human(h_pos)
 		possible_choice = list(self.adj[self.robot_point])
-		score_list = {}
+		self.score_list = {}
 		while(len(possible_choice) > 0):
 			buttons.social_score = 0
 			buttons.effective_score = 0
@@ -403,6 +451,7 @@ class Map:
 			self.build_default(screen, flags)
 			draw_dashed_line(screen, self.red, self.realcoords[self.robot_point], self.realcoords[next_goal])
 			buttons.draw_button(screen)
+			human.draw_human(h_pos)
 			pg.display.update()
 			while not selected and time.time() <= timeout:
 				for event in pg.event.get():
@@ -414,12 +463,11 @@ class Map:
 
 			# Update human feedback score
 			print("Reach here")
-			print(buttons.social_score)
-			print(buttons.effective_score)
+			# print(buttons.social_score)
+			# print(buttons.effective_score)
 			self.human_social = buttons.social_score
 			self.human_effective = buttons.effective_score
-			name = self.robot_point+next_goal
-			score_list[name] = [self.human_social, self.human_effective]
+			self.score_list[next_goal] = [self.human_social, self.human_effective]
 			possible_choice.remove(next_goal)
 		next_goal,next_goal_point,goal_x,goal_y = self.make_decision()
 		return (next_goal,next_goal_point, goal_x, goal_y,True)
@@ -434,6 +482,22 @@ class Map:
 		bad = pg.image.load("bad.jpg").convert()
 		socialbad = pg.transform.scale(bad, (220, 70))
 		effectbad = pg.transform.scale(bad, (220, 70))
+
+		#Define Human
+		pic_one = pg.image.load("human_one.png").convert()
+		pic_one_tran= pg.transform.scale(pic_one, (10, 30))
+		human_one = Human(pic_one_tran,screen)
+
+
+		pic_two = pg.image.load("human_one.png").convert()
+		pic_two_tran = pg.transform.scale(pic_two, (220, 70))
+		human_two = Human(pic_two_tran, screen)
+
+
+		pic_three = pg.image.load("human_one.png").convert()
+		pic_three_tran = pg.transform.scale(pic_three, (220, 70))
+		human_three = Human(pic_three_tran, screen)
+
 
 		start = pg.image.load("start.png").convert()
 		start = pg.transform.scale(start,(30,40))
@@ -463,10 +527,11 @@ class Map:
 			# 	self.robot_x = self.realcoords[self.start][0]
 			# 	self.robot_y = self.realcoords[self.start][1]
 
-			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags)
+			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags,human_one)
 			if not run:
 				break
 			run = self.draw_robot(screen,next_goal,next_goal_point,goal_x,goal_y,flags)
+
 			if not run:
 				break
 		pg.quit()
@@ -474,8 +539,16 @@ class Map:
 speed = 10
 screen_resize_parameter = 1
 start = 'r1'
-end = 'd2'
-wait_time = 0.5
-M = Map(1550,700,start,end,speed,wait_time)
+end = 'd10'
+wait_time = 10
+reward = 0
+mode = "separate"
+time_slot =20
+finalQ = 10000
+human_points = [['d19','d20']]
+start_time = 8
+human_time = 9
+
+M = Map(1550,700,start,end,speed,wait_time,reward,mode,time_slot,finalQ,human_points,start_time)
 
 M.start_map()
