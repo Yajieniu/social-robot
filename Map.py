@@ -425,7 +425,7 @@ class Map:
 			#Update Human feedback to Q-table
 			self.RL.HumanFeedback(self.score_list,state)
 			action = self.RL.chooseAction(state)
-			print(action)
+			print("Action: ", action)
 			self.RL.learn(state,self.reward,action)
 			self.cur_time += self.cost[self.robot_point][action]
 			next_goal = action
@@ -433,6 +433,8 @@ class Map:
 			goal_x = self.realcoords[next_goal][0]
 			goal_y = self.realcoords[next_goal][1]
 		return next_goal,next_goal_point,goal_x,goal_y
+
+
 
 	def get_next_goal(self,buttons,screen,flags,human):
 
@@ -460,11 +462,6 @@ class Map:
 				buttons.event_handler()
 				if buttons.social_score != 0 and buttons.effective_score != 0:
 					selected = True
-
-			# Update human feedback score
-			print("Reach here")
-			# print(buttons.social_score)
-			# print(buttons.effective_score)
 			self.human_social = buttons.social_score
 			self.human_effective = buttons.effective_score
 			self.score_list[next_goal] = [self.human_social, self.human_effective]
@@ -522,10 +519,10 @@ class Map:
 				break
 			#Restart the Run
 			#Need to pause and ask if continue
-			# if self.robot_point == self.goal:
-			# 	self.robot_point = self.start
-			# 	self.robot_x = self.realcoords[self.start][0]
-			# 	self.robot_y = self.realcoords[self.start][1]
+			if self.robot_point == self.goal:
+				self.robot_point = self.start
+				self.robot_x = self.realcoords[self.start][0]
+				self.robot_y = self.realcoords[self.start][1]
 
 			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags,human_one)
 			if not run:
@@ -538,17 +535,20 @@ class Map:
 
 speed = 10
 screen_resize_parameter = 1
-start = 'r1'
+start = 'd2'
 end = 'd10'
-wait_time = 10
+wait_time = 30
 reward = 0
 mode = "separate"
 time_slot =20
 finalQ = 10000
 human_points = [['d19','d20']]
-start_time = 8
+start_time = 8*20
 human_time = 9
 
 M = Map(1550,700,start,end,speed,wait_time,reward,mode,time_slot,finalQ,human_points,start_time)
+
+max_time = 7.81200003624
+min_time = 0.75
 
 M.start_map()

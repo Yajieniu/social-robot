@@ -26,6 +26,12 @@ class QLearn:
         self.alpha = alpha
         self.start_time = start_time
 
+    def cal_alpha(self, cost):
+        max_value = 7.81200003624  # max cost
+        min_value = 0.75  # min cost
+        const = 0.1 / (max_value - min_value)
+        return 0.85 + (max_value - cost) * const
+
     #Help to create a rule to form q_table key with two keypoints r in front of d and smaller number in front of big number.
     def naming(self,key1,key2):
 
@@ -65,13 +71,20 @@ class QLearn:
         if self.mode == "separate":
             for next_goal in feedback:
                 slot = int(math.floor(time + self.costs[point][next_goal]/ self.time_len))
+                print("Human Next Goal: ", next_goal)
+                print("Check slot: ", slot)
                 effect = feedback[next_goal][0]
                 social = feedback[next_goal][1]
-                print("Check: ", next_goal)
-                print("Check: ", slot)
-                print("Check: ", self.effect_q_table[next_goal])
+                #print('Current Point Check: ', point)
+                #print("Next Point Check: ", next_goal)
+                #print("Time Slot Check: ", slot)
+                #print("Table Next Goal Check: ", self.effect_q_table[next_goal])
                 self.effect_q_table[next_goal][slot] += effect
                 self.social_q_table[next_goal][slot] += social
+                print(self.effect_q_table[next_goal])
+                print("！！！！！！")
+
+
         else:
             slot = int(math.floor(time / self.time_len))
             for next_goal in feedback:
@@ -96,25 +109,30 @@ class QLearn:
             cost = self.costs[point][action]
             self.update_totalQ(state,reward+self.gamma*q,cost)
 
+
+
+
+
     def updateQ(self,state,effect_q,social_q,cost):
         point = state[0]
         time = state[1]
         slot = int(math.floor(time / self.time_len))
         old_effect = self.effect_q_table[point][slot]
         old_social = self.social_q_table[point][slot]
-        new_effect = (1 - self.alpha) * old_effect + self.alpha * effect_q - cost
+        new_effect = (1 - self.cal_alpha(cost)) * old_effect + self.cal_alpha(cost) * effect_q
         new_social = (1-self.alpha)* old_social + self.alpha * social_q
 
         self.effect_q_table[point][slot] = new_effect
         self.social_q_table[point][slot] = new_social
 
+
 #Currently using simple addition to add value
     def update_totalQ(self, state, value,cost):
         point = state[0]
         time = state[1]
-        slot = int(math.floor(time / self.time_len))
+        slot = int(math.floor(time / self.time_len))%(24*20)
         oldv = self.total_q_table[point][slot]
-        newq = (1-self.alpha)* oldv + self.alpha * value - cost
+        newq = (1- self.cal_alpha(cost))* oldv + self.cal_alpha(cost) * value
 
         self.total_q_table[point][slot] = newq
 
@@ -122,7 +140,7 @@ class QLearn:
     def chooseAction(self,state):
         point = state[0]
         time = state[1]
-        slot = int(math.floor(time / self.time_len))
+        slot = int(math.floor(time / self.time_len))%(24*20)
         if self.mode == "separate":
             #Currently diabled
             if random.random() > 1000000000:  # a small chance that action is chose randomly
@@ -131,15 +149,21 @@ class QLearn:
                 if self.epsilon > 0.01 and self.reduceRate == 50:
                     self.epsilon -= 0.001
                 return random.choice(list(self.adj[point]))
+
+
+
             else:
                 maxq = 0
                 action = -1
                 for end in self.adj[point]:
                     new_slot = int(math.floor((time+ self.costs[point][end]) / self.time_len))
-                    print(self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot])
+                    print("Check End: ", end)
+                    print("Check Slot: ", new_slot)
+                    print("Check Q: ",self.effect_q_table[end])
                     if self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot]>maxq:
                         action = end
                         maxq = self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot]
+                print("Check Action: ", action)
                 if action == -1:
                     return random.choice(list(self.adj[point]))
                 return action
