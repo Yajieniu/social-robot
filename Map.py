@@ -4,6 +4,7 @@ import numpy
 import random
 import time
 from RL import *
+import pickle
 
 def draw_dashed_line(surf, color, start_pos, end_pos, width=1, dash_length= 10):
 	x1, y1 = start_pos
@@ -512,7 +513,7 @@ class Map:
 		button_list.add_button('effectgood',(700,520), effectgood, "good")
 		button_list.add_button('effectbad',(700, 620), effectbad, "bad")
 		while run:
-			pg.time.delay(100)
+			pg.time.delay(10)
 			for event in pg.event.get():
 				if event.type == pg.QUIT:
 					run = False
@@ -527,10 +528,13 @@ class Map:
 				self.show_time = 0
 				self.cur_time = 160
 				if self.mode == "separate":
-					np.save("effect_q_table.data",self.RL.effect_q_table)
-					np.save("social_q_table.data", self.RL.social_q_table)
+					effect_file = open('effect_q_table.pickle','wb')
+					pickle.dump(self.RL.effect_q_table, effect_file)
+					social_file = open('social_q_table.pickle', 'wb')
+					pickle.dump(self.RL.effect_q_table, social_file)
 				else:
-					np.save("total_q_table.data", self.RL.total_q_table)
+					total_file = open('total_q_table.pickle', 'wb')
+					pickle.dump(self.RL.total_q_table, total_file)
 
 
 			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags,human_one)

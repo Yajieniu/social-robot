@@ -1,10 +1,11 @@
 import numpy as np
 import math
 import random
+import pickle
 
 class QLearn:
 
-    def __init__(self, keypoints,adj,costs,reward,mode,time_slot, goal,finalQ,start_time, epsilon=0.5, alpha=0.9, gamma=0.9):
+    def __init__(self, keypoints,adj,costs,reward,mode,time_slot, goal,finalQ,start_time, epsilon=0.1, alpha=0.9, gamma=0.9):
 
         self.effect_q_table = {}
         self.social_q_table = {}
@@ -48,16 +49,28 @@ class QLearn:
 
 
     def initialize_q_table(self):
-        for point in self.keypoints:
-            if self.mode == "separate":
-                self.effect_q_table[point] = np.zeros(24*self.time_slot)
-                self.social_q_table[point] = np.zeros(24*self.time_slot)
-            else:
-                self.total_q_table[point] = np.zeros(24*self.time_slot)
-        if self.mode == "separate":
-            self.effect_q_table[self.goal][:] = self.finalQ
-        else:
-            self.total_q_table[self.goal][:] = self.finalQ
+        #Uncomment this part to load
+
+
+        social_file = open('social_q_table.pickle', 'rb')
+        self.social_q_table = pickle.load(social_file)
+        effect_file = open('effect_q_table.pickle', 'rb')
+        self.effect_q_table = pickle.load(effect_file)
+        social_file.close()
+        effect_file.close()
+
+
+        # for point in self.keypoints:
+        #     if self.mode == "separate":
+        #         self.effect_q_table[point] = np.zeros(24*self.time_slot)
+        #         self.social_q_table[point] = np.zeros(24*self.time_slot)
+        #     else:
+        #         self.total_q_table[point] = np.zeros(24*self.time_slot)
+        # if self.mode == "separate":
+        #     self.effect_q_table[self.goal][:] = self.finalQ
+        # else:
+        #     self.total_q_table[self.goal][:] = self.finalQ
+
 
     def getReward(self,flag,feedback):
 
