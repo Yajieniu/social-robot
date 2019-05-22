@@ -129,7 +129,8 @@ class Map:
 		self.speed = speed
 		self.wait_time = wait_time
 		self.cur_time = start_time
-
+		self.time_len = 60 / time_slot
+		self.show_time = 0
 
 		#Define RL stuff
 		self.reward = reward
@@ -371,7 +372,7 @@ class Map:
 		time_tagRect.center = (60, 550)
 		screen.blit(time_tag, time_tagRect)
 
-		time_text = font.render(str(round(self.cur_time,4)), True, black, white)
+		time_text = font.render(str(round(self.show_time,4)), True, black, white)
 		time_textRect = time_text.get_rect()
 		time_textRect.center = (200, 550)
 		screen.blit(time_text, time_textRect)
@@ -426,7 +427,8 @@ class Map:
 			self.RL.HumanFeedback(self.score_list,state)
 			action = self.RL.chooseAction(state)
 			self.RL.learn(state,self.reward,action)
-			self.cur_time += self.cost[self.robot_point][action]
+			self.cur_time = int(math.floor(self.cur_time  + self.cost[self.robot_point][action]/ self.time_len)) % 480
+			self.show_time += self.cost[self.robot_point][action]
 			next_goal = action
 			next_goal_point = self.realcoords[next_goal]
 			goal_x = self.realcoords[next_goal][0]
@@ -522,6 +524,14 @@ class Map:
 				self.robot_point = self.start
 				self.robot_x = self.realcoords[self.start][0]
 				self.robot_y = self.realcoords[self.start][1]
+				self.show_time = 0
+				self.cur_time = 160
+				if self.mode == "separate":
+					np.save("effect_q_table.data",self.RL.effect_q_table)
+					np.save("social_q_table.data", self.RL.social_q_table)
+				else:
+					np.save("total_q_table.data", self.RL.total_q_table)
+
 
 			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags,human_one)
 			if not run:
@@ -534,9 +544,9 @@ class Map:
 
 speed = 10
 screen_resize_parameter = 1
-start = 'd2'
-end = 'd10'
-wait_time = 10
+start = 'd1'
+end = 'd2'
+wait_time = 0.001
 reward = 0
 mode = "separate"
 time_slot =20
