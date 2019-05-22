@@ -68,7 +68,9 @@ class QLearn:
     def HumanFeedback(self,feedback,state):
         point = state[0]
         time = state[1]
+        print("Human Time: ",time)
         if self.mode == "separate":
+            print(feedback)
             for next_goal in feedback:
                 slot = int(math.floor(time + self.costs[point][next_goal]/ self.time_len))
                 print("Human Next Goal: ", next_goal)
@@ -81,8 +83,8 @@ class QLearn:
                 #print("Table Next Goal Check: ", self.effect_q_table[next_goal])
                 self.effect_q_table[next_goal][slot] += effect
                 self.social_q_table[next_goal][slot] += social
-                print(self.effect_q_table[next_goal])
-                print("！！！！！！")
+                #print(self.effect_q_table[next_goal])
+                #print("！！！！！！")
 
 
         else:
@@ -140,7 +142,6 @@ class QLearn:
     def chooseAction(self,state):
         point = state[0]
         time = state[1]
-        slot = int(math.floor(time / self.time_len))%(24*20)
         if self.mode == "separate":
             #Currently diabled
             if random.random() > 1000000000:  # a small chance that action is chose randomly
@@ -156,10 +157,10 @@ class QLearn:
                 maxq = 0
                 action = -1
                 for end in self.adj[point]:
-                    new_slot = int(math.floor((time+ self.costs[point][end]) / self.time_len))
+                    new_slot = int(math.floor(time+ self.costs[point][end] / self.time_len))
                     print("Check End: ", end)
                     print("Check Slot: ", new_slot)
-                    print("Check Q: ",self.effect_q_table[end])
+                    #print("Check Q: ",self.effect_q_table[end])
                     if self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot]>maxq:
                         action = end
                         maxq = self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot]

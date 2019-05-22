@@ -361,8 +361,8 @@ class Map:
 		end_textRect.center = (1300, 650)
 		screen.blit(end_text, end_textRect)
 
-		screen.blit(flags[0], (1400, 520))
-		screen.blit(flags[1], (1400, 620))
+		screen.blit(flags[0], (1350, 520))
+		screen.blit(flags[1], (1350, 620))
 
 	def draw_time(self,screen,black,white):
 		font = pg.font.Font('freesansbold.ttf', 20)
@@ -425,7 +425,6 @@ class Map:
 			#Update Human feedback to Q-table
 			self.RL.HumanFeedback(self.score_list,state)
 			action = self.RL.chooseAction(state)
-			print("Action: ", action)
 			self.RL.learn(state,self.reward,action)
 			self.cur_time += self.cost[self.robot_point][action]
 			next_goal = action
@@ -508,8 +507,8 @@ class Map:
 		button_list = Buttons()
 		button_list.add_button('socialgood',(400,520),socialgood,"good")
 		button_list.add_button('socialbad',(400, 620), socialbad, "bad")
-		button_list.add_button('effectgood',(900,520), effectgood, "good")
-		button_list.add_button('effectbad',(900, 620), effectbad, "bad")
+		button_list.add_button('effectgood',(700,520), effectgood, "good")
+		button_list.add_button('effectbad',(700, 620), effectbad, "bad")
 		while run:
 			pg.time.delay(100)
 			for event in pg.event.get():
@@ -537,7 +536,7 @@ speed = 10
 screen_resize_parameter = 1
 start = 'd2'
 end = 'd10'
-wait_time = 30
+wait_time = 10
 reward = 0
 mode = "separate"
 time_slot =20
