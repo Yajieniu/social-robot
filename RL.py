@@ -51,13 +51,12 @@ class QLearn:
     def initialize_q_table(self):
         #Uncomment this part to load
 
-
-        social_file = open('social_q_table.pickle', 'rb')
-        self.social_q_table = pickle.load(social_file)
-        effect_file = open('effect_q_table.pickle', 'rb')
-        self.effect_q_table = pickle.load(effect_file)
-        social_file.close()
-        effect_file.close()
+        if self.mode == "separate":
+            self.effect_q_table = np.load("effect_q_table.data.npy")[()]
+            self.social_q_table = np.load("social_q_table.data.npy")[()]
+            print(self.effect_q_table)
+        else:
+            self.total_q_table = np.load("total_q_table.data.npy")[()]
 
 
         # for point in self.keypoints:
@@ -82,9 +81,9 @@ class QLearn:
     def HumanFeedback(self,feedback,state):
         point = state[0]
         time = state[1]
-        print("Human Time: ",time)
+        #print("Human Time: ",time)
         if self.mode == "separate":
-            print(feedback)
+            #print(feedback)
             for next_goal in feedback:
                 slot = int(math.floor(time + self.costs[point][next_goal]/ self.time_len)) % 480
                 effect = feedback[next_goal][0]
@@ -164,6 +163,7 @@ class QLearn:
                 action = -1
                 for end in self.adj[point]:
                     new_slot = int(math.floor(time+ self.costs[point][end] / self.time_len)) % 480
+                    print(self.effect_q_table[point])
                     if self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot]>maxq:
                         action = end
                         maxq = self.effect_q_table[end][new_slot] + self.social_q_table[end][new_slot]

@@ -528,13 +528,10 @@ class Map:
 				self.show_time = 0
 				self.cur_time = 160
 				if self.mode == "separate":
-					effect_file = open('effect_q_table.pickle','wb')
-					pickle.dump(self.RL.effect_q_table, effect_file)
-					social_file = open('social_q_table.pickle', 'wb')
-					pickle.dump(self.RL.effect_q_table, social_file)
+					np.save("effect_q_table.data",self.RL.effect_q_table)
+					np.save("social_q_table.data", self.RL.social_q_table)
 				else:
-					total_file = open('total_q_table.pickle', 'wb')
-					pickle.dump(self.RL.total_q_table, total_file)
+					np.save("total_q_table.data", self.RL.total_q_table)
 
 
 			(next_goal,next_goal_point, goal_x, goal_y,run) = self.get_next_goal(button_list,screen,flags,human_one)
@@ -548,9 +545,9 @@ class Map:
 
 speed = 10
 screen_resize_parameter = 1
-start = 'd1'
-end = 'd2'
-wait_time = 0.001
+start = 'd23'
+end = 'i4'
+wait_time = 0.0001
 reward = 0
 mode = "separate"
 time_slot =20
